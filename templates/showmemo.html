@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<style>
+    html,
+    body{ width:100%;  height:100%;   margin:0px;  font-family:궁서; }    
+    img{
+        margin: 3px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+    .back{       
+        align-items: center;
+    }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>
+        var counter=0;
+        function questionInput(){            
+            if (counter<3){
+                $.ajax({
+                    url:"/savequestion/"+{{memodata.pk}}+"/"+document.getElementById('floatingTextarea').value+"/{{ uid }}",
+                    type:'GET',
+                    success:function(response){
+                        var div = document.createElement('div');                                    
+                        div.innerHTML ='<div class="row back"><div class="col-2"><img src="{{imageUrl}}"></div><div class="col">'+document.getElementById('floatingTextarea').value+'</div>';
+                        document.getElementById('questionTable').appendChild(div);
+                        document.getElementById('floatingTextarea').value='';
+                        counter+=1;
+                    },
+                    error:function(response){
+                        document.getElementById('floatingTextarea').value='입력실패';
+                    }
+                });                
+            }
+            else{
+                document.getElementById('floatingTextarea').value='그만 쓰셔요';
+            }
+        }
+
+    function openkakao(str){
+        Android.openkakao(str);
+    }
+var showreplay=[];
+    function replay(pk){
+        let pandan=0;
+        for(let i=0;i<showreplay.length;i++){
+            if(showreplay[i]==pk)
+            {
+                pandan=1;
+            }
+        }
+        if(pandan==0)
+        {
+                 
+        $.ajax({
+                    url:"/showanswer/"+pk,
+                    type:'GET',
+                    success:function(response){
+                        var data = JSON.parse(response);
+                        for(let i=0;i<data.length;i++){
+                            var div = document.createElement('div');                                    
+                            div.innerHTML ='<div class="row"><div class="col-1"></div><div class="col-2"><img src="{{memodata.imageURL}}"></div><div class="col">'+data[i].fields['answerdata']+'</div>';
+                            document.getElementById("replay"+pk).appendChild(div);
+                        }
+                        document.getElementById("dap"+pk).remove();
+                        showreplay.push(pk);
+                    },
+                    error:function(response){
+
+                    }
+                });
+        }
+    }
+    function saveAnswerdata(pk){
+        $.ajax({
+                    url:"/saveAnswer/"+pk+"/"+document.getElementById("answer"+pk).value,
+                    type:'GET',
+                    success:function(response){                                                
+                        let div = document.createElement('div');
+                        div.innerHTML='<div class="row"><div class="col-1"></div><div class="col-2"><img src="{{memodata.imageURL}}"></div><div class="col">'+document.getElementById("answer"+pk).value+'</div>';
+                        document.getElementById("replay"+pk).append(div);        
+                        document.getElementById("answerdiv"+pk).remove();                                                
+                    },
+                    error:function(response){
+                    }
+                });
+        
+    }
+
+    function answer(pk){
+        $.ajax({
+                    url:"/showanswer/"+pk,
+                    type:'GET',
+                    success:function(response){
+                        var data = JSON.parse(response);
+                        for(let i=0;i<data.length;i++){
+                            var div = document.createElement('div');                                    
+                            div.innerHTML ='<div class="row"><div class="col-1"></div><div class="col-2"><img src="{{memodata.imageURL}}"></div><div class="col">'+data[i].fields['answerdata']+'</div>';
+                            document.getElementById("replay"+pk).appendChild(div);
+                        }
+                        document.getElementById("dap"+pk).remove();
+                        if(data.length<1){
+                            var div = document.createElement('div');
+                            div.innerHTML =' <div class="input-group" id="answerdiv'+pk+'"> <input type="text" id="answer'+pk+'" class="form-control" placeholder="답글 입력"><span class="input-group-text" onclick="saveAnswerdata('+pk+');">입력하기</span></div>';
+                            document.getElementById("replay"+pk).appendChild(div);        
+                            document.getElementById("dap"+pk).remove();
+                        }
+                        
+                    },
+                    error:function(response){
+
+                    }
+                });
+        
+    }
+    </script>    
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-2"><img src="{{memodata.imageURL}}" alt="" srcset=""></div>
+            <div class="col">{{memodata.writeDate}}</div>
+            <div class="col-3">                
+                {% if memodata.kakaochat != "비공개"  %}
+                    <span class="badge bg-warning" onclick="openkakao('{{memodata.kakaochat}}')">오픈채팅 열기</span>
+                {% else %}
+                    <span class="badge bg-secondary">오픈채팅 비공개</span>
+                {% endif %}
+             
+            </div>
+                
+        </div>
+        <div class="row">
+            <div class="col">
+                {{memodata.memo}}           
+        </div>
+        </div>
+        {% for outdata in questiondata %}
+            <div class="row" id="replay{{outdata.pk}}">
+                <div class="col-2"><img src="{{outdata.imageURL}}" alt=""></div>
+                <div class="col">{{outdata.questiondata}}</div>            
+            <div class="col-1 m-1" id="dap{{outdata.pk}}" onclick=" 
+            {% if uid != memodata.userID %}
+                replay({{outdata.pk}});
+            {% else %}
+                answer({{outdata.pk}});
+            {% endif %}" style="background-color: rgb(255,240,240); border-radius: 0px 5px 5px 0px;">답변</div>
+            
+            </div>
+        {% endfor %}
+            <div class="rowmt-1" id="questionTable"></div>
+           <div class="row">
+               {% if uid != memodata.userID %}
+                    <div class="form-floating">
+                    <textarea class="form-control" placeholder="" id="floatingTextarea" style="height: 5rem" onchange="questionInput()"></textarea>
+                    <label for="floatingTextarea2">댓글을 쓰셔요</label>
+                    </div> 
+              {% endif %}       
+        </div>
+    </div>
+    
+</body>
+</html>

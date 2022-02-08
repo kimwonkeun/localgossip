@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <div onclick="pusharr('오락실','목욕탕')">호호호호</div>
+    <div onclick="pusharr('게임방','목욕탕')">하하하하하</div>
+    <div onclick="pusharr('목욕탕','목욕탕')">히히히히히</div>
+    <div id="hello"></div>
+<script>
+    var arr=[];
+    function pusharr(indata,compare){
+        let pandan=0;
+        var outstr;
+        arr.push(indata);     
+        for (let i=0;i<arr.length;i++){
+            if(arr[i]==compare)
+            {
+                pandan=1;
+            }           
+        }
+        if(pandan==0){
+        //에이잭스 실행
+        }
+        else{
+            //아무실행 안함            
+        }
+    }
+</script>
+</body>
+</html>
